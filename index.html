@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Filter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 font-sans antialiased">
+
+    <div class="max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Word Filter</h1>
+
+        <div class="mb-4">
+            <label for="inputText" class="block text-xl font-medium text-gray-700">Input Text:</label>
+            <textarea id="inputText" placeholder="Enter your text here..."
+                class="w-full p-3 mt-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500"
+                rows="4"></textarea>
+        </div>
+
+        <div class="mb-4">
+            <label for="knownWords" class="block text-xl font-medium text-gray-700">Known Words
+                (comma-separated):</label>
+            <textarea id="knownWords" placeholder="Enter known words separated by commas..."
+                class="w-full p-3 mt-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500"
+                rows="4"></textarea>
+        </div>
+
+        <div class="flex flex-wrap justify-center mb-6 gap-2">
+            <button onclick="filterWords()"
+                class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 w-full sm:w-auto">Filter
+                Words</button>
+            <button onclick="saveKnownWords()"
+                class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 w-full sm:w-auto">Save Known
+                Words</button>
+            <button onclick="loadKnownWords()"
+                class="bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700 w-full sm:w-auto">Load Known
+                Words</button>
+            <button onclick="sortKnownWords()"
+                class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 w-full sm:w-auto">Sort Known
+                Words</button>
+        </div>
+
+        <div class="flex flex-wrap justify-center mb-6 gap-2">
+            <button onclick="copyFilteredWords()"
+                class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 w-full sm:w-auto">Copy Filtered
+                Words</button>
+            <button onclick="addFilteredToKnownWords()"
+                class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 w-full sm:w-auto">Add Filtered
+                Words to Known Words</button>
+        </div>
+
+        <div class="output mt-6 p-4 bg-white border border-gray-300 rounded-lg shadow-md" id="output"></div>
+    </div>
+
+
+
+    <script>
+        function filterWords() {
+
+            const inputText = document.getElementById("inputText").value;
+            const knownWordsText = document.getElementById("knownWords").value;
+
+
+            const inputWords = inputText.split(/\s+/).map(word => word.replace(/[^a-zA-Z]/g, "").toLowerCase());
+
+
+            const knownWords = knownWordsText.split(",").map(word => word.trim().replace(/[^a-zA-Z]/g, "").toLowerCase());
+
+
+            const filteredWords = inputWords.filter(word => word && !knownWords.includes(word));
+
+
+            const uniqueFilteredWords = [...new Set(filteredWords)];
+            const outputDiv = document.getElementById("output");
+            outputDiv.textContent = uniqueFilteredWords.join(", ");
+        }
+
+        function saveKnownWords() {
+            const knownWordsText = document.getElementById("knownWords").value;
+            localStorage.setItem("knownWords", knownWordsText);
+            alert("Known words saved to localStorage.");
+        }
+
+        function loadKnownWords() {
+            const knownWords = localStorage.getItem("knownWords");
+            if (knownWords) {
+                document.getElementById("knownWords").value = knownWords;
+                alert("Known words loaded from localStorage.");
+            } else {
+                alert("No known words found in localStorage.");
+            }
+        }
+
+
+        function sortKnownWords() {
+            const knownWordsText = document.getElementById("knownWords").value;
+            const knownWords = [...new Set(knownWordsText.split(",").map(word => word.trim().replace(/[^a-zA-Z]/g, "").toLowerCase()))].sort();
+            document.getElementById("knownWords").value = knownWords.join(", ");
+            alert("Known words sorted alphabetically and duplicates removed.");
+        }
+
+        function copyFilteredWords() {
+            const outputDiv = document.getElementById("output");
+            const textToCopy = outputDiv.textContent;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert("Filtered words copied to clipboard.");
+            }).catch(err => {
+                alert("Failed to copy: " + err);
+            });
+        }
+
+        function addFilteredToKnownWords() {
+            const outputDiv = document.getElementById("output");
+            const filteredWords = outputDiv.textContent.split(",").map(word => word.trim());
+
+            const knownWordsText = document.getElementById("knownWords").value;
+            const knownWords = knownWordsText.split(",").map(word => word.trim());
+
+            const updatedKnownWords = [...new Set([...knownWords, ...filteredWords])].filter(word => word);
+
+            document.getElementById("knownWords").value = updatedKnownWords.join(", ");
+            alert("Filtered words added to known words.");
+        }
+    </script>
+</body>
+
+</html>
